@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+console.log("ENV TEST:", process.env.RAPID_API_KEY);
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
@@ -86,10 +86,11 @@ app.post("/api/play", async(req,res)=>{
 
 
 
-        const data =
-        await rapid.json();
+        const data = await rapid.json();
 
-
+        console.log("RapidAPI status:", rapid.status);
+        console.log("RapidAPI response:", data);
+        console.log("Rapid key loaded:",process.env.RAPID_API_KEY ? "YES" : "NO");
 
         if(!data.success){
 
