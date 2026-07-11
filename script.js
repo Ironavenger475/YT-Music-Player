@@ -302,26 +302,18 @@ function cueOnly(index){
   player.cueVideoById(queue[index].id);
 }
 
-function playAt(index){
-  if(!queue[index]) return;
+const iframe = document.getElementById("ytPlayer");
 
-  if(!playerReady){
-    // Remember what we wanted to play; onReady() will pick this up.
-    pendingPlayIndex = index;
+function playAt(index) {
+    if (!queue[index]) return;
+
     currentIndex = index;
     updateNowPlaying();
-    renderQueue();
-    saveQueue();
-    showStatus('Loading player…');
-    return;
-  }
 
-  currentIndex = index;
-  updateNowPlaying();
-  player.loadVideoById(queue[index].id);
-  player.setPlaybackRate(parseFloat(el('speedSelect').value));
-  renderQueue();
-  saveQueue();
+    iframe.src =
+        `https://youtube.ttools.io/watch?v=${queue[index].id}`;
+
+    renderQueue();
 }
 
 function stopPlayback(){
