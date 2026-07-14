@@ -1,6 +1,6 @@
 /* ================= State ================= */
 const STORAGE_KEY = 'vinyl-queue-v1';
-let queue = [];         // {id, title, author, thumb}
+let queue = [];
 let currentIndex = -1;
 let isShuffled = false;
 let shuffleOrder = [];
@@ -10,7 +10,7 @@ let playerReady = false;
 let isPlaying = false;
 let progressTimer = null;
 let draggedIndex = null;
-let pendingPlayIndex = null; // track we tried to play before the API was ready
+let pendingPlayIndex = null;
 
 const el = (id) => document.getElementById(id);
 const statusMsg = el('statusMsg');
@@ -20,15 +20,13 @@ const emptyState = el('emptyState');
 const queueCount = el('queueCount');
 const playBtn = el('playBtn');
 
-// Disable play control until the YouTube API actually confirms it's ready —
-// this is what was silently swallowing the "not working" click before.
 playBtn.disabled = true;
 
 /* ================= Persistence ================= */
 function saveQueue(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify({queue, currentIndex, repeatMode, isShuffled}));
-  }catch(e){ /* storage may be unavailable, fail silently */ }
+  }catch(e){ console.log("Error: Storage not available")}
 }
 function loadQueue(){
   try{
@@ -63,8 +61,7 @@ function extractVideoId(rawUrl){
       if(u.pathname.startsWith('/embed/')) return u.pathname.split('/')[2];
       if(u.pathname.startsWith('/live/')) return u.pathname.split('/')[2];
     }
-  }catch(e){ /* not a valid absolute URL */ }
-  // fallback: bare 11-char id typed directly
+  }catch(e){ console.log("Not a Valid URL")}
   const bare = url.trim();
   if(/^[a-zA-Z0-9_-]{11}$/.test(bare)) return bare;
   return null;
@@ -135,6 +132,9 @@ function renderQueue(){
   }
   emptyState.style.display = 'none';
   queueWrap.style.display = 'block';
+  queueWrap.style.backgroundColor = 'rgba(29,185,84,0.25)'
+  queueWrap.style.padding = '10px'
+  queueWrap.style.borderRadius = '12px'
   queueCount.textContent = `Queue · ${queue.length}`;
 
   queueList.innerHTML = '';
@@ -239,8 +239,6 @@ function loadYT(){
   document.head.appendChild(tag);
 }
 
-// This global callback name is required by the YouTube IFrame API — it calls
-// it automatically once the underlying player script has loaded.
 window.onYouTubeIframeAPIReady = function(){
   player = new YT.Player('ytPlayer', {
     height: '1', width: '1',
@@ -251,8 +249,6 @@ window.onYouTubeIframeAPIReady = function(){
         playBtn.disabled = false;
         player.setVolume(parseInt(el('volBar').value, 10));
 
-        // If the user clicked "Add"/a track before the API finished loading,
-        // this is where that click actually gets honored.
         if(pendingPlayIndex !== null){
           const idx = pendingPlayIndex;
           pendingPlayIndex = null;
@@ -265,7 +261,7 @@ window.onYouTubeIframeAPIReady = function(){
       onError: (e)=>{
         const messages = {2:'Invalid video.', 5:'Playback error.', 100:'Video not found or removed.', 101:'Owner disabled embedding for this video.', 150:'Owner disabled embedding for this video.'};
         showStatus(messages[e.data] || 'Something went wrong playing that track.', 'err');
-        goNext(true); // skip the broken track automatically
+        goNext(true);
       }
     }
   });
@@ -290,7 +286,7 @@ function onPlayerStateChange(e){
 }
 
 function handleTrackEnd(){
-  if(repeatMode === 2){ // repeat one
+  if(repeatMode === 2){ 
     playAt(currentIndex);
     return;
   }
@@ -306,7 +302,6 @@ function playAt(index){
   if(!queue[index]) return;
 
   if(!playerReady){
-    // Remember what we wanted to play; onReady() will pick this up.
     pendingPlayIndex = index;
     currentIndex = index;
     updateNowPlaying();
@@ -353,7 +348,7 @@ playBtn.addEventListener('click', ()=>{
     return;
   }
   if(currentIndex === -1 && queue.length){ playAt(0); return; }
-  if(currentIndex === -1) return; // nothing to play at all
+  if(currentIndex === -1) return;
   if(isPlaying){ player.pauseVideo(); } else { player.playVideo(); }
 });
 
@@ -392,7 +387,6 @@ function goNext(){
 
 function goPrev(){
   if(queue.length === 0) return;
-  // if we're more than 3s into the track, restart it instead of going back
   if(player && playerReady && player.getCurrentTime && player.getCurrentTime() > 3){
     player.seekTo(0, true);
     return;
@@ -412,7 +406,7 @@ el('shuffleBtn').addEventListener('click', ()=>{
   saveQueue();
 });
 
-const repeatIcons = ['🔁', '🔁', '🔂'];
+const repeatIcons = ['↪️', '🔁', '🔂'];
 el('repeatBtn').addEventListener('click', ()=>{
   repeatMode = (repeatMode + 1) % 3;
   el('repeatBtn').textContent = repeatIcons[repeatMode];
