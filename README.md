@@ -12,4 +12,4 @@ Play music from youtube directly in a playlist form like a music player.
 - Add a recommendation section
 - Bug fixes
 
-<a href="https://ironavenger475.github.io/YT-Music-Player/">## Link to Github pages</a>
+<a href="https://ironavenger475.github.io/YT-Music-Player/" target="_blank">Link to Github pages</a>
