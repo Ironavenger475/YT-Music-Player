@@ -5,6 +5,7 @@ Play music from youtube directly in a playlist form like a music player.
 ## Current Version:
 - Plays an embedded video that is very small and can be controlled by a media bar in the bottom
 - Currently cannot play songs whose creators have embedded video option disabled
+- Saves the playlist locally so that it can be used again on next load
 
 ## Future improvements:
 - Improve UI
